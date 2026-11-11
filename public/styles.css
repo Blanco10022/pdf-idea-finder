@@ -130,6 +130,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .metrics b { font-size: 14px; }
 .bar { display: block; height: 5px; border-radius: 3px; background: var(--border); margin-top: 4px; overflow: hidden; }
 .bar-fill { display: block; height: 100%; background: var(--accent); }
+.sources-line { margin: 0; font-size: 12px; display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.sources-line .chip { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
 .score { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); }
 .score b { font-size: 22px; color: var(--accent); }
 .score b small { font-size: 13px; color: var(--muted); }

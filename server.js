@@ -3,7 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateIdeas, NICHES } from './lib/ideas.js';
-import { aiEnabled, activeProvider, polish } from './lib/ai.js';
+import { aiEnabled, activeProviders, polish } from './lib/ai.js';
+import { sourceStatus } from './lib/sources.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = fileURLToPath(new URL('./public/', import.meta.url));
@@ -60,7 +61,12 @@ async function serveStatic(req, res) {
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method === 'GET' && req.url === '/api/config') {
-      return sendJson(res, 200, { niches: Object.keys(NICHES), ai: aiEnabled(), provider: activeProvider() });
+      return sendJson(res, 200, {
+        niches: Object.keys(NICHES),
+        ai: aiEnabled(),
+        providers: activeProviders(),
+        sources: sourceStatus(),
+      });
     }
     if (req.method === 'POST' && req.url === '/api/ideas') {
       const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress;
