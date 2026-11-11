@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF Idea Finder</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='19' font-size='18'>💡</text></svg>" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-icon">💡</div>
+        <div>
+          <div class="brand-name">PDF Idea Finder</div>
+          <div class="brand-sub">Ideas from real search data</div>
+        </div>
+      </div>
+      <nav>
+        <a href="#/" data-route="dashboard" class="nav-link">▦ Dashboard</a>
+        <a href="#/generate" data-route="generate" class="nav-link">✦ Generate Ideas</a>
+        <a href="#/saved" data-route="saved" class="nav-link">★ Saved Ideas <span class="badge" id="savedBadge">0</span></a>
+      </nav>
+      <div class="sidebar-foot">Data: Google, YouTube &amp; DuckDuckGo autocomplete, Wikipedia pageviews</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+        <h1 id="pageTitle">Dashboard</h1>
+      </header>
+
+      <!-- Dashboard -->
+      <section class="view" data-view="dashboard">
+        <div class="hero">
+          <h2>Find your next PDF guide</h2>
+          <p>Ideas built from the questions people are actually typing into search engines right now, not guesses.</p>
+        </div>
+        <h3 class="section-title">Quick actions</h3>
+        <div class="grid3">
+          <a class="action-card" href="#/generate"><span class="ac-icon">✦</span><b>Generate new ideas</b><span>Search a topic or niche</span></a>
+          <a class="action-card" href="#/saved"><span class="ac-icon">★</span><b>View saved ideas</b><span>Review and export favorites</span></a>
+          <a class="action-card" href="#/generate" id="continueLast"><span class="ac-icon">↻</span><b>Continue last search</b><span id="lastSearchLabel">No searches yet</span></a>
+        </div>
+        <h3 class="section-title">Your stats</h3>
+        <div class="grid3">
+          <div class="stat"><span>Saved ideas</span><b id="statSaved">0</b></div>
+          <div class="stat"><span>Searches run</span><b id="statSearches">0</b></div>
+          <div class="stat"><span>Last search</span><b id="statLast">-</b></div>
+        </div>
+      </section>
+
+      <!-- Generate -->
+      <section class="view" data-view="generate" hidden>
+        <form class="panel" id="genForm">
+          <label for="topic">What topic or problem do you want PDF ideas for? <span class="muted">(optional if you pick a niche)</span></label>
+          <input id="topic" name="topic" maxlength="80" placeholder="e.g. new puppy, budgeting for students, sourdough" autocomplete="off" />
+          <div class="row">
+            <div class="col">
+              <label for="niche">Niche</label>
+              <select id="niche" name="niche"></select>
+            </div>
+            <div class="col">
+              <label for="count">Number of ideas: <b id="countLabel">10</b></label>
+              <input type="range" id="count" name="count" min="3" max="20" value="10" />
+            </div>
+          </div>
+          <label class="check" id="aiRow" hidden>
+            <input type="checkbox" id="useAi" checked /> <span id="aiLabel">Polish titles and outlines with AI (scores always come from real data)</span>
+          </label>
+          <button class="btn-primary" id="genBtn" type="submit">✦ Generate ideas</button>
+          <p class="error" id="genError" hidden></p>
+        </form>
+
+        <div class="panel loading" id="loading" hidden>
+          <div class="spinner"></div>
+          <b>Collecting real search queries…</b>
+          <span class="muted">Querying autocomplete across 3 engines. Usually 5–15 seconds.</span>
+        </div>
+
+        <div id="results"></div>
+      </section>
+
+      <!-- Saved -->
+      <section class="view" data-view="saved" hidden>
+        <div class="toolbar">
+          <span class="muted" id="savedCount"></span>
+          <button class="btn-ghost" id="exportSaved">Export CSV</button>
+        </div>
+        <div class="cards" id="savedList"></div>
+      </section>
+    </main>
+  </div>
+  <template id="cardTpl">
+    <article class="card">
+      <div class="card-head">
+        <h4 class="card-title"></h4>
+        <button class="save-btn" type="button">☆ Save</button>
+      </div>
+      <p class="card-desc"></p>
+      <p class="card-aud"></p>
+      <div class="chips"></div>
+      <div class="metrics">
+        <div><span>Demand</span><b class="m-demand"></b><i class="bar"><em class="bar-fill m-demand-bar"></em></i></div>
+        <div><span>Questions</span><b class="m-questions"></b></div>
+        <div><span>Real queries</span><b class="m-queries"></b></div>
+        <div><span>Engines</span><b class="m-engines"></b></div>
+      </div>
+      <div class="score"><span>Opportunity score</span><b class="m-score"></b></div>
+      <details class="more">
+        <summary class="q-summary"></summary>
+        <ul class="queries"></ul>
+      </details>
+      <details class="more">
+        <summary>Suggested outline</summary>
+        <ol class="outline"></ol>
+      </details>
+    </article>
+  </template>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
