@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { generateIdeas, NICHES } from './lib/ideas.js';
 import { aiEnabled, activeProviders, polish } from './lib/ai.js';
 import { sourceStatus } from './lib/sources.js';
+import { apifyEnabled } from './lib/apify-trends.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = fileURLToPath(new URL('./public/', import.meta.url));
@@ -66,6 +67,7 @@ const server = http.createServer(async (req, res) => {
         ai: aiEnabled(),
         providers: activeProviders(),
         sources: sourceStatus(),
+        apify: apifyEnabled(),
       });
     }
     if (req.method === 'POST' && req.url === '/api/ideas') {
@@ -77,6 +79,7 @@ const server = http.createServer(async (req, res) => {
         niche: body.niche,
         count: body.count,
         polish: body.useAi && aiEnabled() ? polish : null,
+        deepTrends: Boolean(body.deepTrends) && apifyEnabled(),
       });
       return sendJson(res, 200, result);
     }

@@ -62,6 +62,7 @@ async function loadConfig() {
   const cfg = await fetch('/api/config').then((r) => r.json());
   $('#niche').innerHTML = cfg.niches.map((n) => `<option>${n}</option>`).join('');
   $('#aiRow').hidden = !cfg.ai;
+  $('#deepRow').hidden = !cfg.apify;
   if (cfg.ai) {
     const names = (cfg.providers || []).map((p) => PROVIDER_NAMES[p] || p);
     const label =
@@ -85,6 +86,7 @@ $('#genForm').addEventListener('submit', async (e) => {
     niche: $('#niche').value,
     count: Number($('#count').value),
     useAi: !$('#aiRow').hidden && $('#useAi').checked,
+    deepTrends: !$('#deepRow').hidden && $('#deepTrends').checked,
   };
   $('#genError').hidden = true;
   $('#genBtn').disabled = true;

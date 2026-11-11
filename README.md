@@ -4,17 +4,17 @@ Finds PDF guide ideas from **real search data**: the queries people are typing i
 
 ## How it works
 
-1. **Collect.** For each seed (your topic, or 3 seeds for the chosen niche), ~45 autocomplete lookups expand it with question and problem modifiers (`how to …`, `why …`, `… mistakes`, `… for beginners`, `… a-z`). Typically 250–350 unique real queries.
-2. **Group.** Queries are clustered around the most common shared sub-topics (e.g. "first night", "potty schedule", "not eating").
-3. **Score.** Every number comes from the observed data:
-   - **Demand**: how often and how high the cluster's queries rank across autocomplete lookups (relative to this search, 0–100).
-   - **Questions**: share of queries phrased as questions (a sign of a problem to solve).
-   - **Engines**: which engines surfaced it (Google, YouTube, DuckDuckGo).
-   - **Opportunity**: 50% demand, 20% questions, 15% engine reach, 15% specificity (longer, niche queries).
-   - **Topic trend**: Wikipedia daily pageviews, last 30 days vs the 60 before.
-4. **Write (optional).** With `ANTHROPIC_API_KEY` set, Claude (`claude-opus-5-5`) writes each idea's title, description, audience and outline, using only that cluster's real queries. It never produces numbers. Without a key, titles come straight from the top real query.
+1. **Collect.** For each seed (your topic, or 3 seeds for the chosen niche), it gathers real signals from every configured source:
+   - **Autocomplete** (always on): Google, YouTube, DuckDuckGo, Amazon, eBay — expanded with question/problem/buyer modifiers (`how to …`, `… mistakes`, `… for beginners`, `… a-z`). ~250–350 unique queries.
+   - **YouTube Data API** (if `YOUTUBE_API_KEY`): real video titles + **view counts** (engagement signal).
+   - **Reddit** (if `REDDIT_CLIENT_ID`/`REDDIT_SECRET`): top post titles + upvotes (real pain points).
+   - **Google Trends** (free endpoint, best-effort) and **Wikipedia pageviews** for topic trend.
+   - **Deep Google Trends via Apify** (opt-in toggle, if `APIFY_TOKEN`): reliable related/rising queries + a real interest-over-time line. Slower (~30–60s) and spends Apify credit, so it's off by default and cached per topic.
+2. **Group.** Signals are clustered around shared sub-topics (e.g. "first night", "potty schedule").
+3. **Score** (all from observed data, relative to this search): **Demand**, **Questions** (share phrased as questions), **Engagement** (YouTube views / Reddit upvotes), **Sources** (how many sources surfaced it), **Specificity**, and an **Opportunity** blend. Rising-on-Trends clusters get a bonus.
+4. **Write (optional).** AI providers self-activate by key: **Gemini** (`GEMINI_API_KEY`, free), **Groq** (`GROQ_API_KEY`, free), **Claude** (`ANTHROPIC_API_KEY`, paid). With one, it writes the copy; with two or more it runs **compare + pick best** (each model writes ideas, the most capable judges/merges). Models only write titles/descriptions/outlines — never the numbers.
 
-Saved ideas and search history live in the browser's localStorage. Results and saved ideas export to CSV.
+Saved ideas and history live in the browser's localStorage. Results and saved ideas export to CSV. Every source and provider is optional and activates only when its key is present.
 
 ## Run locally
 
@@ -38,5 +38,6 @@ The server caches each lookup for 6 hours and allows 12 searches per minute per 
 
 - Autocomplete reflects popularity, but it is **not search volume**. Free sources don't give monthly volumes; a paid keyword API (DataForSEO, Keywords Everywhere) could add them later.
 - No competition metric yet.
-- Reddit blocks anonymous API access (403), so it isn't used.
 - The Google/YouTube suggest endpoints are unofficial and can rate-limit heavy use.
+- The free Google Trends endpoint is flaky (rate-limits); the Apify deep-trends option is reliable but, on Apify's free plan, slow and variable (~30–60s, occasional timeouts). A paid Apify plan makes it fast/consistent.
+- X (Twitter), Threads, Quora and Facebook have no free, legitimate search API and are not included.
