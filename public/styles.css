@@ -128,6 +128,9 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .metrics div { display: flex; flex-direction: column; font-size: 12px; }
 .metrics span { color: var(--muted); }
 .metrics b { font-size: 14px; }
+.metrics b.good { color: var(--good); }
+.metrics b.warn { color: var(--warn); }
+.metrics b.bad { color: var(--bad); }
 .bar { display: block; height: 5px; border-radius: 3px; background: var(--border); margin-top: 4px; overflow: hidden; }
 .bar-fill { display: block; height: 100%; background: var(--accent); }
 .sources-line { margin: 0; font-size: 12px; display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }

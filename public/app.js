@@ -73,7 +73,16 @@ async function loadConfig() {
   }
   // Show which real data sources are live.
   const src = cfg.sources || {};
-  const live = [...(src.autocomplete || []), src.youtube && 'YouTube data', src.reddit && 'Reddit', src.trends && 'Google Trends', src.wikipedia && 'Wikipedia'].filter(Boolean);
+  const live = [
+    ...(src.autocomplete || []),
+    src.youtube && 'YouTube data',
+    src.reddit && 'Reddit',
+    src.stackexchange && 'Stack Exchange',
+    src.trends && 'Google Trends',
+    src.datamuse && 'Datamuse',
+    src.openlibrary && 'Open Library (competition)',
+    src.wikipedia && 'Wikipedia',
+  ].filter(Boolean);
   const el = $('#sourcesLine');
   if (el) el.textContent = `Live data sources: ${live.join(', ')}`;
 }
@@ -138,6 +147,13 @@ function engagementLabel(m) {
   if (m.redditScore > 0) return `${compact(m.redditScore)} upvotes`;
   return '—';
 }
+// Lower competition (fewer existing books) is better.
+function competitionLabel(m) {
+  if (m.competition == null) return { text: 'n/a', cls: '' };
+  if (m.competition < 33) return { text: 'low', cls: 'good' };
+  if (m.competition < 66) return { text: 'medium', cls: 'warn' };
+  return { text: 'high', cls: 'bad' };
+}
 
 function renderResults(data) {
   const root = $('#results');
@@ -191,6 +207,10 @@ function buildCard(idea, trend) {
   $('.m-questions', el).textContent = `${m.questionShare}%`;
   $('.m-queries', el).textContent = m.queryCount;
   $('.m-engagement', el).textContent = engagementLabel(m);
+  const comp = competitionLabel(m);
+  $('.m-competition', el).textContent = comp.text;
+  $('.m-competition', el).className = `m-competition ${comp.cls}`;
+  $('.m-books', el).textContent = m.bookCount == null ? '—' : m.bookCount.toLocaleString();
   $('.m-sources', el).innerHTML = (m.sources || []).map((s) => `<span class="chip">${esc(s)}</span>`).join(' ');
   $('.m-score', el).innerHTML = `${m.opportunity}<small>/100</small>`;
   $('.q-summary', el).textContent = `Show real search queries (${idea.exampleQueries.length})`;
@@ -232,12 +252,12 @@ function renderSaved() {
 $('#exportSaved').addEventListener('click', () => downloadCsv(saved, 'saved-pdf-ideas.csv'));
 
 function downloadCsv(ideas, filename) {
-  const cols = ['title', 'description', 'audience', 'difficulty', 'opportunity', 'demand', 'engagement', 'questionShare', 'queryCount', 'sources', 'exampleQueries', 'outline'];
+  const cols = ['title', 'description', 'audience', 'difficulty', 'opportunity', 'demand', 'competition', 'existingBooks', 'engagement', 'questionShare', 'queryCount', 'sources', 'exampleQueries', 'outline'];
   const cell = (v) => `"${String(v ?? '').replaceAll('"', '""')}"`;
   const rows = ideas.map((i) =>
     [
-      i.title, i.description, i.audience, i.difficulty, i.metrics.opportunity, i.metrics.demand, engagementLabel(i.metrics), i.metrics.questionShare,
-      i.metrics.queryCount, (i.metrics.sources || []).join(' | '), i.exampleQueries.map((q) => q.text).join(' | '), (i.outline || []).join(' | '),
+      i.title, i.description, i.audience, i.difficulty, i.metrics.opportunity, i.metrics.demand, competitionLabel(i.metrics).text, i.metrics.bookCount ?? '',
+      engagementLabel(i.metrics), i.metrics.questionShare, i.metrics.queryCount, (i.metrics.sources || []).join(' | '), i.exampleQueries.map((q) => q.text).join(' | '), (i.outline || []).join(' | '),
     ].map(cell).join(','),
   );
   const blob = new Blob([[cols.join(','), ...rows].join('\n')], { type: 'text/csv' });

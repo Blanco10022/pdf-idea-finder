@@ -6,12 +6,16 @@ Finds PDF guide ideas from **real search data**: the queries people are typing i
 
 1. **Collect.** For each seed (your topic, or 3 seeds for the chosen niche), it gathers real signals from every configured source:
    - **Autocomplete** (always on): Google, YouTube, DuckDuckGo, Amazon, eBay — expanded with question/problem/buyer modifiers (`how to …`, `… mistakes`, `… for beginners`, `… a-z`). ~250–350 unique queries.
+   - **Stack Exchange** (keyless): real questions from the Q&A site matching the niche (Cooking, Money, Parenting, Pets, …).
+   - **Datamuse** (keyless): a few close related phrases per seed, lightly probed for adjacent angles.
+   - **Open Library** (keyless): existing-book count per idea → a **competition / saturation** metric. Few books = underserved; many = crowded.
    - **YouTube Data API** (if `YOUTUBE_API_KEY`): real video titles + **view counts** (engagement signal).
    - **Reddit** (if `REDDIT_CLIENT_ID`/`REDDIT_SECRET`): top post titles + upvotes (real pain points).
    - **Google Trends** (free endpoint, best-effort) and **Wikipedia pageviews** for topic trend.
    - **Deep Google Trends via Apify** (opt-in toggle, if `APIFY_TOKEN`): reliable related/rising queries + a real interest-over-time line. Slower (~30–60s) and spends Apify credit, so it's off by default and cached per topic.
 2. **Group.** Signals are clustered around shared sub-topics (e.g. "first night", "potty schedule").
-3. **Score** (all from observed data, relative to this search): **Demand**, **Questions** (share phrased as questions), **Engagement** (YouTube views / Reddit upvotes), **Sources** (how many sources surfaced it), **Specificity**, and an **Opportunity** blend. Rising-on-Trends clusters get a bonus.
+   A relevance gate drops any cluster that never mentions a seed word, so expansion/autocomplete drift can't produce off-topic ideas.
+3. **Score** (all from observed data, relative to this search): **Demand**, **Competition** (from existing-book counts — lower is better), **Questions** (share phrased as questions), **Engagement** (YouTube views / Reddit upvotes), **Sources**, **Specificity**, and an **Opportunity** blend that rewards high demand + low competition. Rising-on-Trends clusters get a bonus.
 4. **Write (optional).** AI providers self-activate by key: **Gemini** (`GEMINI_API_KEY`, free), **Groq** (`GROQ_API_KEY`, free), **Claude** (`ANTHROPIC_API_KEY`, paid). With one, it writes the copy; with two or more it runs **compare + pick best** (each model writes ideas, the most capable judges/merges). Models only write titles/descriptions/outlines — never the numbers.
 
 Saved ideas and history live in the browser's localStorage. Results and saved ideas export to CSV. Every source and provider is optional and activates only when its key is present.
