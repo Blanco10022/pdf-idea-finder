@@ -61,6 +61,7 @@ const PROVIDER_NAMES = { gemini: 'Gemini', groq: 'Groq', claude: 'Claude' };
 async function loadConfig() {
   const cfg = await fetch('/api/config').then((r) => r.json());
   $('#niche').innerHTML = cfg.niches.map((n) => `<option>${n}</option>`).join('');
+  aiAvailable = cfg.ai;
   $('#aiRow').hidden = !cfg.ai;
   $('#deepRow').hidden = !cfg.apify;
   if (cfg.ai) {
@@ -219,6 +220,8 @@ function buildCard(idea, trend) {
     .join('');
   $('.outline', el).innerHTML = (idea.outline || []).map((o) => `<li>${esc(o)}</li>`).join('');
 
+  wirePdfButton($('.pdf-btn', el), $('.pdf-status', el), idea);
+
   const btn = $('.save-btn', el);
   const key = idea.title.toLowerCase();
   const sync = () => {
@@ -264,6 +267,43 @@ function downloadCsv(ideas, filename) {
   const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: filename });
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+let aiAvailable = false;
+function wirePdfButton(btn, status, idea) {
+  if (!aiAvailable) {
+    btn.disabled = true;
+    btn.title = 'Add a Gemini, Groq or Claude key to generate guides';
+  }
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const label = btn.textContent;
+    btn.textContent = '⏳ Writing your guide…';
+    status.hidden = true;
+    try {
+      const res = await fetch('/api/guide', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Failed (${res.status})`);
+      const blob = await res.blob();
+      const name = (res.headers.get('Content-Disposition')?.match(/filename="(.+?)"/) || [])[1] || 'guide.pdf';
+      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: name });
+      a.click();
+      URL.revokeObjectURL(a.href);
+      status.hidden = false;
+      status.className = 'pdf-status ok';
+      status.textContent = `✓ Downloaded "${name}"`;
+    } catch (err) {
+      status.hidden = false;
+      status.className = 'pdf-status err';
+      status.textContent = err.message;
+    } finally {
+      btn.disabled = !aiAvailable;
+      btn.textContent = label;
+    }
+  });
 }
 
 function updateBadge() {

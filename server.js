@@ -6,6 +6,10 @@ import { generateIdeas, NICHES } from './lib/ideas.js';
 import { aiEnabled, activeProviders, polish } from './lib/ai.js';
 import { sourceStatus } from './lib/sources.js';
 import { apifyEnabled } from './lib/apify-trends.js';
+import { writeGuide } from './lib/guide.js';
+import { renderGuidePdf } from './lib/pdf.js';
+
+const safeName = (s) => (s || 'guide').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'guide';
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = fileURLToPath(new URL('./public/', import.meta.url));
@@ -82,6 +86,21 @@ const server = http.createServer(async (req, res) => {
         deepTrends: Boolean(body.deepTrends) && apifyEnabled(),
       });
       return sendJson(res, 200, result);
+    }
+    if (req.method === 'POST' && req.url === '/api/guide') {
+      const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress;
+      if (rateLimited(ip, 6)) return sendJson(res, 429, { error: 'Too many guide generations. Wait a minute and try again.' });
+      const body = await readBody(req, 60_000);
+      if (!body.idea?.title) return sendJson(res, 400, { error: 'Missing idea.' });
+      const { guide, model } = await writeGuide(body.idea);
+      const pdf = await renderGuidePdf(guide);
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${safeName(guide.title)}.pdf"`,
+        'X-Guide-Model': model,
+        'Cache-Control': 'no-store',
+      });
+      return res.end(pdf);
     }
     if (req.method === 'GET') return serveStatic(req, res);
     sendJson(res, 405, { error: 'Method not allowed' });

@@ -143,6 +143,12 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .more li { margin: 2px 0; }
 .eng { color: var(--muted); font-size: 11px; }
 .empty { text-align: center; color: var(--muted); padding: 40px 16px; }
+.pdf-btn { margin-top: 4px; border: 1px solid var(--accent); background: var(--panel); color: var(--accent); border-radius: 10px; padding: 9px; font: inherit; font-weight: 600; cursor: pointer; }
+.pdf-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.pdf-btn:disabled { opacity: .5; cursor: not-allowed; }
+.pdf-status { margin: 2px 0 0; font-size: 12px; }
+.pdf-status.ok { color: var(--good); }
+.pdf-status.err { color: var(--bad); }
 
 @media (max-width: 860px) {
   .grid3 { grid-template-columns: 1fr; }

@@ -18,6 +18,8 @@ Finds PDF guide ideas from **real search data**: the queries people are typing i
 3. **Score** (all from observed data, relative to this search): **Demand**, **Competition** (from existing-book counts — lower is better), **Questions** (share phrased as questions), **Engagement** (YouTube views / Reddit upvotes), **Sources**, **Specificity**, and an **Opportunity** blend that rewards high demand + low competition. Rising-on-Trends clusters get a bonus.
 4. **Write (optional).** AI providers self-activate by key: **Gemini** (`GEMINI_API_KEY`, free), **Groq** (`GROQ_API_KEY`, free), **Claude** (`ANTHROPIC_API_KEY`, paid). With one, it writes the copy; with two or more it runs **compare + pick best** (each model writes ideas, the most capable judges/merges). Models only write titles/descriptions/outlines — never the numbers.
 
+5. **Generate the guide (optional).** Click "Generate PDF guide" on any idea → an AI provider writes a full manuscript (intro, 5–8 chapters with tips, conclusion) answering the idea's real queries, and it's rendered into a **designed PDF** (cover, contents, styled chapters, page numbers) with `@react-pdf/renderer` — no paid API, no headless browser, runs on free hosting. `POST /api/guide` with `{ "idea": {...} }` returns the PDF.
+
 Saved ideas and history live in the browser's localStorage. Results and saved ideas export to CSV. Every source and provider is optional and activates only when its key is present.
 
 ## Run locally
