@@ -1,0 +1,28 @@
+# Render blueprint. In Render: New + -> Blueprint -> connect this repo.
+# Render provisions the service from here; you enter the secret values (sync:false)
+# in the dashboard, so no keys live in the repo. Render sets PORT automatically.
+services:
+  - type: web
+    name: pdf-idea-finder
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      # AI polish (set at least one for AI; two or more enables compare + pick best)
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Optional data sources (each self-activates when set)
+      - key: APIFY_TOKEN
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_SECRET
+        sync: false
