@@ -39,6 +39,22 @@ function route() {
 window.addEventListener('hashchange', route);
 $('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
 
+// ---------- Theme ----------
+function currentTheme() {
+  return document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+}
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try {
+    localStorage.setItem('theme', t);
+  } catch {
+    /* ignore */
+  }
+  $('#themeBtn').textContent = t === 'dark' ? '☀' : '☾';
+}
+$('#themeBtn').addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark'));
+setTheme(currentTheme());
+
 // ---------- Dashboard ----------
 function renderDashboard() {
   $('#statSaved').textContent = saved.length;
