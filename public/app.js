@@ -178,9 +178,16 @@ function renderResults(data) {
     .map((t) => {
       const cls = t.direction === 'rising' ? 'good' : t.direction === 'falling' ? 'bad' : 'warn';
       const sign = t.changePct > 0 ? '+' : '';
-      return `<div class="panel trend-box" style="color:var(--accent)">${sparkline(t.sparkline)}
-        <div style="color:var(--text)"><b>Topic interest: <span class="chip ${cls}">${t.direction} ${sign}${t.changePct}%</span></b><br>
-        <span class="muted">Wikipedia "<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.article)}</a>": ${t.dailyViewsRecent.toLocaleString()} views/day last 30 days vs ${t.dailyViewsPrior.toLocaleString()} before</span></div></div>`;
+      // Two trend shapes: Wikipedia (daily pageviews) and Apify Google Trends (interest index).
+      const sourceLabel = t.source || 'Wikipedia';
+      const detail =
+        t.dailyViewsRecent != null
+          ? `${t.dailyViewsRecent.toLocaleString()} views/day last 30 days vs ${t.dailyViewsPrior.toLocaleString()} before`
+          : 'search interest over the last 3 months';
+      const link = t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.article || sourceLabel)}</a>` : esc(t.article || sourceLabel);
+      return `<div class="panel trend-box" style="color:var(--accent)">${t.sparkline ? sparkline(t.sparkline) : ''}
+        <div style="color:var(--text)"><b>Topic interest: <span class="chip ${cls}">${esc(t.direction)} ${sign}${t.changePct}%</span></b><br>
+        <span class="muted">${esc(sourceLabel)} — ${link}: ${detail}</span></div></div>`;
     })
     .join('');
 

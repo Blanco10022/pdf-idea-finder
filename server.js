@@ -51,14 +51,16 @@ async function serveStatic(req, res) {
   const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   const rel = normalize(path === '/' ? 'index.html' : path.slice(1));
   if (rel.startsWith('..')) return sendJson(res, 400, { error: 'Bad path' });
+  // Revalidate on every load so an updated app.js/css/html is never served stale.
+  const noCache = { 'Cache-Control': 'no-cache, must-revalidate' };
   try {
     const data = await readFile(join(PUBLIC_DIR, rel));
-    res.writeHead(200, { 'Content-Type': TYPES[extname(rel)] || 'application/octet-stream' });
+    res.writeHead(200, { 'Content-Type': TYPES[extname(rel)] || 'application/octet-stream', ...noCache });
     res.end(data);
   } catch {
     // Single-page app: unknown paths fall back to the shell.
     const data = await readFile(join(PUBLIC_DIR, 'index.html'));
-    res.writeHead(200, { 'Content-Type': TYPES['.html'] });
+    res.writeHead(200, { 'Content-Type': TYPES['.html'], ...noCache });
     res.end(data);
   }
 }
